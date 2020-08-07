@@ -1,8 +1,12 @@
 package santander_tec.dto.request;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class MeetupRequest {
 
     private String organizerId;//TODO cuando tenga login mandar esto por header

@@ -28,10 +28,17 @@ public class GuestService {
 
     public List<Guest> addGuests(Set<String> guestEmails, Meetup meetup){
         LOGGER.info("Going to find the employees of the guest emails.");
-        Set<Employee> employeesSet = guestEmails.stream().map(employeeService::findByEmail).collect(Collectors.toSet());
+        Set<Employee> employeesSet = employeeService.findByEmailSet(guestEmails);
         LOGGER.info("Going to build and save the guests for the meetup {}", meetup.getId());
         Set<Guest> guests = employeesSet.stream().map(employee -> buildGuest(employee, meetup)).collect(Collectors.toSet());
         return guestRepository.saveAll(guests);
+    }
+
+    public Guest addGuest(String guestEmployeeId, Meetup meetup){
+        LOGGER.info("Going to find the employee {}", guestEmployeeId);
+        Employee employee = employeeService.findById(guestEmployeeId);
+        LOGGER.info("Going to build and save the guest for the meetup {}", meetup.getId());
+        return guestRepository.save(buildGuest(employee, meetup));
     }
 
     private Guest buildGuest(Employee employee, Meetup meetup) {
@@ -41,5 +48,11 @@ public class GuestService {
         newGuest.setMeetup(meetup);
         newGuest.setStatus(GuestStatus.NOT_CONFIRMED);
         return newGuest;
+    }
+
+    public void updateGuestStatus(Meetup meetup, String guestEmployeeId, GuestStatus newGuestStatus){
+        Employee employee = employeeService.findById(guestEmployeeId);
+        LOGGER.info("Going to update the guest status to {} for the meetup {}", newGuestStatus, meetup.getId());
+        guestRepository.updateGuestStatus(meetup, employee, newGuestStatus);
     }
 }

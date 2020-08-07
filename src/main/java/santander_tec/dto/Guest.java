@@ -12,7 +12,6 @@ public class Guest extends IdentificableEntity{
     @Enumerated(EnumType.STRING)
     private GuestStatus status;
     @ManyToOne
-    @JoinColumn(name = "meetup_id")
     private Meetup meetup;
 
     public Employee getEmployee() {
@@ -29,10 +28,6 @@ public class Guest extends IdentificableEntity{
 
     public void setStatus(GuestStatus status) {
         this.status = status;
-    }
-
-    public Meetup getMeetup() {
-        return meetup;
     }
 
     public void setMeetup(Meetup meetup) {

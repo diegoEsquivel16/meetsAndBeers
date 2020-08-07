@@ -5,10 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import santander_tec.dto.Guest;
-import santander_tec.dto.Location;
-import santander_tec.dto.Meetup;
-import santander_tec.dto.WeatherInformation;
+import santander_tec.dto.*;
 import santander_tec.dto.request.MeetupRequest;
 import santander_tec.dto.response.MeetupCreationResponse;
 import santander_tec.exceptions.FinishedMeetupException;
@@ -36,23 +33,14 @@ public class MeetupService {
         this.guestService = guestService;
     }
 
-    public Meetup findById(String meetupId){
-        LOGGER.info("Going to find meetup {}",meetupId);
-        Meetup meetup = meetupRepository.findById(meetupId).orElseThrow(() -> new MeetUpNotFoundException(meetupId));
-        if(meetupAlreadyFinished(meetup.getDate())) {
-            LOGGER.error("The meetup {} already finish the day {}", meetupId, meetup.getDate());
-            throw new FinishedMeetupException(meetupId, meetup.getDate());
-        }
-        return meetup;
-    }
-
     public WeatherInformation getWeatherInformation(String meetupId) {
-        Meetup meetup = findById(meetupId);
+        Meetup meetup = findMeetupByIdIfNotFinished(meetupId);
         return weatherService.getWeatherInformation(meetup);
     }
 
-    private Boolean meetupAlreadyFinished(LocalDateTime finishDate){
-        return LocalDateTime.now().isAfter(finishDate);
+    public Meetup findMeetup(String meetupId){
+        LOGGER.info("Going to find meetup {}",meetupId);
+        return meetupRepository.findById(meetupId).orElseThrow(() -> new MeetUpNotFoundException(meetupId));
     }
 
     public MeetupCreationResponse createMeetup(MeetupRequest meetupRequest) {
@@ -63,6 +51,32 @@ public class MeetupService {
         List<Guest> persistedGuests = guestService.addGuests(meetupRequest.getGuestEmails(), persistedMeetup);
 
         return buildMeetupResponse(newMeetup, persistedGuests);
+    }
+
+    public void subscribeToMeetup(String meetupId, String employeeId) {
+        LOGGER.info("Going to subscribe the employee {} to the meetup {}", employeeId, meetupId);
+        guestService.addGuest(employeeId, findMeetupByIdIfNotFinished(meetupId));
+    }
+
+    public void confirmGuestParticipationToMeetup(String meetupId, String employeeId){
+        updateMeetupGuestStatus(meetupId, employeeId, GuestStatus.CONFIRMED);
+    }
+
+    public void guestRefusesParticipationToMeetup(String meetupId, String employeeId){
+        updateMeetupGuestStatus(meetupId, employeeId, GuestStatus.NOT_GOING);
+    }
+
+    public Meetup findMeetupByIdIfNotFinished(String meetupId){
+        Meetup meetup = findMeetup(meetupId);
+        if(meetupAlreadyFinished(meetup.getDate())) {
+            LOGGER.error("The meetup {} already finish the day {}", meetupId, meetup.getDate());
+            throw new FinishedMeetupException(meetupId, meetup.getDate());
+        }
+        return meetup;
+    }
+
+    private Boolean meetupAlreadyFinished(LocalDateTime finishDate){
+        return LocalDateTime.now().isAfter(finishDate);
     }
 
     private void validateMeetupRequest(MeetupRequest meetupRequest) {
@@ -99,6 +113,11 @@ public class MeetupService {
         meetupResponse.setLocation(newMeetup.getLocation().name());
         meetupResponse.setGuests(persistedGuests);
         return meetupResponse;
+    }
+
+    private void updateMeetupGuestStatus(String meetupId, String employeeId, GuestStatus newStatus) {
+        Meetup meetup = findMeetupByIdIfNotFinished(meetupId);
+        guestService.updateGuestStatus(meetup, employeeId, newStatus);
     }
 
 }

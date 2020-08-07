@@ -1,10 +1,13 @@
 package santander_tec.dto.response;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import santander_tec.dto.Guest;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class MeetupCreationResponse {
 
     private String id;

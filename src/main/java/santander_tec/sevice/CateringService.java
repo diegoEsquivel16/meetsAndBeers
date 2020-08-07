@@ -21,6 +21,7 @@ public class CateringService {
     private static final Double MAX_AMOUNT_OF_BEER_BOTTLES = 2.0;
     private static final Double NORMAL_AMOUNT_OF_BEER_BOTTLES = 1.0;
     private static final Double MINIMUM_AMOUNT_OF_BEER_BOTTLES = 0.75;
+    private static final Integer BEER_BOTTLES_PER_BOX = 6;
     private final MeetupService meetupService;
     private final WeatherService weatherService;
 
@@ -32,14 +33,14 @@ public class CateringService {
 
     public CateringResponse getRequiredCatering(String meetupId){
         LOGGER.info("Going to calculate the required catering for the meetup {}...", meetupId);
-        Meetup meetup = meetupService.findById(meetupId);
+        Meetup meetup = meetupService.findMeetupByIdIfNotFinished(meetupId);
         CateringResponse cateringResponse = new CateringResponse();
         try{
             WeatherInformation weatherInformation = weatherService.getWeatherInformation(meetup);
             cateringResponse.setBeverages(buildBeverages(meetup, weatherInformation));
         } catch (ApiWeatherException awe){
             String message = format("Between %s to %s bottles of beer will be needed.",
-                    maxAmountOfBeerBottles(meetup), minimumAmountOfBeerBottles(meetup));
+                    maxAmountOfBeerBoxes(meetup), minimumAmountOfBeerBoxes(meetup));
             LOGGER.warn("Returning estimated values of beer needed. {}", message);
             throw new CateringException(meetupId, message);
         }
@@ -48,17 +49,20 @@ public class CateringService {
 
     private Beverages buildBeverages(Meetup meetup, WeatherInformation weatherInformation) {
         Beverages beverages = new Beverages();
-        beverages.setBeerBottles(calculateAmountOfBeerBottles(meetup, weatherInformation));
+        beverages.setBeerBottleBoxes(calculateAmountOfBeerBoxesForWeather(meetup, weatherInformation).longValue());
         return beverages;
     }
 
-    private Double calculateAmountOfBeerBottles(Meetup meetup, WeatherInformation weatherInformation){
-        return amountOfPossiblesGuests(meetup) * bottlesPerGuest(weatherInformation);
+    private Double calculateAmountOfBeerBoxesForWeather(Meetup meetup, WeatherInformation weatherInformation){
+        return calculateAmountOfBeerBoxes(meetup, bottlesPerGuest(weatherInformation));
     }
-    private Double maxAmountOfBeerBottles(Meetup meetup) { return amountOfPossiblesGuests(meetup) * MAX_AMOUNT_OF_BEER_BOTTLES; }
-    private Double minimumAmountOfBeerBottles(Meetup meetup) { return amountOfPossiblesGuests(meetup) * MINIMUM_AMOUNT_OF_BEER_BOTTLES; }
+    private Double maxAmountOfBeerBoxes(Meetup meetup) { return calculateAmountOfBeerBoxes(meetup, MAX_AMOUNT_OF_BEER_BOTTLES); }
+    private Double minimumAmountOfBeerBoxes(Meetup meetup) { return calculateAmountOfBeerBoxes(meetup, MINIMUM_AMOUNT_OF_BEER_BOTTLES); }
+    private Double calculateAmountOfBeerBoxes(Meetup meetup, Double bottlesPerGuest){
+        return Math.ceil(amountOfPossiblesGuests(meetup) * bottlesPerGuest / BEER_BOTTLES_PER_BOX);
+    }
 
-    private long amountOfPossiblesGuests(Meetup meetup){
+    private Long amountOfPossiblesGuests(Meetup meetup){
         return meetup.getGuests().stream().filter(guest -> !GuestStatus.NOT_GOING.equals(guest.getStatus())).count();
     }
 

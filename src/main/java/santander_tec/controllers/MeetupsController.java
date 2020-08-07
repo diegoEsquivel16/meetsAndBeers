@@ -6,11 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import santander_tec.dto.Meetup;
 import santander_tec.dto.WeatherInformation;
 import santander_tec.dto.request.MeetupRequest;
 import santander_tec.sevice.MeetupService;
-
-import static java.lang.String.format;
 
 @RestController
 @RequestMapping("/meets-and-beer")
@@ -33,6 +32,15 @@ public class MeetupsController {
         }
     }
 
+    @GetMapping("/meetups/{meetupId}")
+    public ResponseEntity<Meetup> findMeetup(@PathVariable String meetupId){
+        try {
+            return ResponseEntity.ok(meetupService.findMeetup(meetupId));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @PostMapping("/meetups")
     public ResponseEntity createMeetup(@RequestBody MeetupRequest meetupRequest){
         try {
@@ -44,14 +52,37 @@ public class MeetupsController {
         }
     }
 
-    @PatchMapping("/meetups/{meetupId}/suscribe")
-    public ResponseEntity<String> suscribeToMeetup(@PathVariable String meetupId){
-        return ResponseEntity.ok(format("tas suscripto ameo %s", meetupId));
+    @PatchMapping("/meetups/{meetupId}/subscribe/{employeeId}") //TODO sacar el employeeId de un header o la sesion
+    public ResponseEntity<Void> suscribeToMeetup(@PathVariable String meetupId, @PathVariable String employeeId){
+        try {
+            meetupService.subscribeToMeetup(meetupId, employeeId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            LOGGER.error("Error while subscribing guest {} for meetup {}", employeeId, meetupId);
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @PatchMapping("/meetups/{meetupId}/update-guest-status")
-    public ResponseEntity<String> checkinToMeetup(@PathVariable String meetupId){
-        return ResponseEntity.ok(format("checkin lesto ameo %s",meetupId));
+    @PatchMapping("/meetups/{meetupId}/check-in/{employeeId}") //TODO sacar el employeeId de un header o la sesion
+    public ResponseEntity<String> confirmGuestParticipationToMeetup(@PathVariable String meetupId, @PathVariable String employeeId){
+        try {
+            meetupService.confirmGuestParticipationToMeetup(meetupId, employeeId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            LOGGER.error("Error while making check-in of {} for meetup {}", employeeId, meetupId);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/meetups/{meetupId}/reject-invitation/{employeeId}") //TODO sacar el employeeId de un header o la sesion
+    public ResponseEntity<String> guestRefusesParticipationToMeetup(@PathVariable String meetupId, @PathVariable String employeeId){
+        try {
+            meetupService.guestRefusesParticipationToMeetup(meetupId, employeeId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            LOGGER.error("Error while making refusing invitation of {} for meetup {}", employeeId, meetupId);
+            return ResponseEntity.notFound().build();
+        }
     }
 
 }

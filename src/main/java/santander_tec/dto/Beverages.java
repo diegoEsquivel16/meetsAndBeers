@@ -1,14 +1,18 @@
 package santander_tec.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Beverages {
 
-    private Double beerBottles;
+    private Long beerBottleBoxes;
 
-    public Double getBeerBottles() {
-        return beerBottles;
+    public Long getBeerBottleBoxes() {
+        return beerBottleBoxes;
     }
 
-    public void setBeerBottles(Double beerBottles) {
-        this.beerBottles = beerBottles;
+    public void setBeerBottleBoxes(Long beerBottleBoxes) {
+        this.beerBottleBoxes = beerBottleBoxes;
     }
 }

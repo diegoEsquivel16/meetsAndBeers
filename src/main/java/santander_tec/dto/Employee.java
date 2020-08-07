@@ -11,7 +11,7 @@ public class Employee extends IdentificableEntity{
     private String firstName;
     @Column(name = "last_name")
     private String lastName;
-    @Column
+    @Column(unique = true)
     private String email;
 
     @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
