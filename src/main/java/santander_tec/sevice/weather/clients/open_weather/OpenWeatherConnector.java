@@ -10,11 +10,6 @@ import okhttp3.ResponseBody;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 import santander_tec.dto.Location;
 import santander_tec.dto.WeatherInformation;
 import santander_tec.exceptions.ApiWeatherException;
@@ -34,7 +29,6 @@ public class OpenWeatherConnector extends CommonConnector implements ApiWeather 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenWeatherConnector.class);
     private ObjectMapper mapper;
     private final String host;
-    private final String apiHost;
     private final String apiKey;
     private static final String CURRENT_WEATHER_PATH= "/weather";
     private static final String FORECAST_WEATHER_PATH= "/forecast/daily";
@@ -43,7 +37,6 @@ public class OpenWeatherConnector extends CommonConnector implements ApiWeather 
     public OpenWeatherConnector(OkHttpClient client) {
         this.client = client;
         this.host = "community-open-weather-map.p.rapidapi.com";
-        this.apiHost = "community-open-weather-map.p.rapidapi.com";
         this.apiKey = "fc9d791fa2mshc615367e40159e3p1dc71ejsnef3513605858";
         this.mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -54,7 +47,7 @@ public class OpenWeatherConnector extends CommonConnector implements ApiWeather 
     public WeatherInformation getCurrentWeatherFor(Location location) {
         URI uri = buildCurrentWeatherURI(location);
         Request request = new Request.Builder().url(uri.toString()).get()
-                .addHeader("x-rapidapi-host", this.apiHost)
+                .addHeader("x-rapidapi-host", this.host)
                 .addHeader("x-rapidapi-key", this.apiKey)
                 .build();
         try{
@@ -78,7 +71,7 @@ public class OpenWeatherConnector extends CommonConnector implements ApiWeather 
         }
         URI uri = buildFurtherWeatherURI(location, forecastDay);
         Request request = new Request.Builder().url(uri.toString()).get()
-                .addHeader("x-rapidapi-host", this.apiHost)
+                .addHeader("x-rapidapi-host", this.host)
                 .addHeader("x-rapidapi-key", this.apiKey)
                 .build();
         try{
@@ -115,13 +108,6 @@ public class OpenWeatherConnector extends CommonConnector implements ApiWeather 
         WeatherInformation weatherInformation = new WeatherInformation();
         weatherInformation.setTemperature(apiResponse.getDayForecastMap().get(forecastDay).get(forecastDay).getTemp().getDay());
         return weatherInformation;
-    }
-
-    private HttpHeaders buildHeaders(){
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("X-RapidAPI-host", apiHost);
-        headers.add("X-RapidAPI-Key", apiKey);
-        return headers;
     }
 
     private URI buildCurrentWeatherURI(Location location){
