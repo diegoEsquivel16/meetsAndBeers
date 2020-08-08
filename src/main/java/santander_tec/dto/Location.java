@@ -2,27 +2,27 @@ package santander_tec.dto;
 
 public enum Location {
 
-    CABA("lat","long","CABA");
+    CABA(-34.599722,-58.381944,"Buenos Aires,ar");
 
-    Location(String latitude, String longitude, String locationId){
+    Location(Double latitude, Double longitude, String locationName){
         this.latitude = latitude;
         this.longitude = longitude;
-        this.locationId = locationId;
+        this.locationName = locationName;
     }
 
-    private final String latitude;
-    private final String longitude;
-    private final String locationId;
+    private final Double latitude;
+    private final Double longitude;
+    private final String locationName;
 
-    public String getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public String getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public String getLocationId() {
-        return locationId;
+    public String getLocationName() {
+        return locationName;
     }
 }

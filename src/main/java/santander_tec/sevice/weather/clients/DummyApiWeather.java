@@ -1,5 +1,6 @@
 package santander_tec.sevice.weather.clients;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import santander_tec.dto.Location;
 import santander_tec.dto.WeatherInformation;
 import santander_tec.sevice.weather.ApiWeather;
@@ -10,6 +11,7 @@ public class DummyApiWeather implements ApiWeather {
 
     private Double responseTemperature;
 
+    @Autowired
     public DummyApiWeather(Double defaultTemperature) {
         this.responseTemperature = defaultTemperature;
     }
