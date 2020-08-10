@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static santander_tec.FieldValidator.validateRequestField;
 
 @Service
 public class EmployeeService {
@@ -63,12 +64,6 @@ public class EmployeeService {
         validateRequestField(newEmployeeRequest.getFirstName(), "firstName");
         validateRequestField(newEmployeeRequest.getLastName(), "lastName");
         validateRequestField(newEmployeeRequest.getEmail(), "email");
-    }
-
-    private void validateRequestField(String field, String fieldName){
-        if(StringUtils.isBlank(field)){
-            throw new IllegalArgumentException(format("The field %s is invalid", fieldName));
-        }
     }
 
     public List<Employee> findAllEmployees() {
