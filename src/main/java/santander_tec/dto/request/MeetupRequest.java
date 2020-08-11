@@ -9,14 +9,9 @@ import java.util.Set;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class MeetupRequest {
 
-    private String organizerId;//TODO cuando tenga login mandar esto por header
     private Set<String> guestEmails;
     private LocalDateTime date;
     private String location;
-
-    public String getOrganizerId() {
-        return organizerId;
-    }
 
     public Set<String> getGuestEmails() {
         return guestEmails;

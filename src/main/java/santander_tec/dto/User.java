@@ -4,8 +4,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -14,8 +13,11 @@ public class User extends IdentificableEntity implements UserDetails {
     @OneToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
+    @ElementCollection(targetClass = Rol.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    private Rol rol;
+    @CollectionTable(name="user_roles")
+    @Column(name="rol")
+    private Set<Rol> roles;
     @Column
     private String password;
 
@@ -27,17 +29,17 @@ public class User extends IdentificableEntity implements UserDetails {
         this.employee = employee;
     }
 
-    public Rol getRol() {
-        return rol;
+    public Set<Rol> getRoles() {
+        return roles;
     }
 
-    public void setRol(Rol rol) {
-        this.rol = rol;
+    public void setRoles(Set<Rol> roles) {
+        this.roles = roles;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new ArrayList<>();
+        return this.roles;
     }
 
     public String getPassword() {

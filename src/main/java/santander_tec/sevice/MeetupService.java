@@ -43,9 +43,9 @@ public class MeetupService {
         return meetupRepository.findById(meetupId).orElseThrow(() -> new MeetUpNotFoundException(meetupId));
     }
 
-    public MeetupCreationResponse createMeetup(MeetupRequest meetupRequest) {
+    public MeetupCreationResponse createMeetup(String organizerEmployeeEmail, MeetupRequest meetupRequest) {
         validateMeetupRequest(meetupRequest);
-        Meetup newMeetup = buildNewMeetup(meetupRequest);
+        Meetup newMeetup = buildNewMeetup(organizerEmployeeEmail, meetupRequest);
 
         Meetup persistedMeetup = meetupRepository.save(newMeetup);
         List<Guest> persistedGuests = guestService.addGuests(meetupRequest.getGuestEmails(), persistedMeetup);
@@ -53,17 +53,17 @@ public class MeetupService {
         return buildMeetupResponse(newMeetup, persistedGuests);
     }
 
-    public void subscribeToMeetup(String meetupId, String employeeId) {
-        LOGGER.info("Going to subscribe the employee {} to the meetup {}", employeeId, meetupId);
-        guestService.addGuest(employeeId, findMeetupByIdIfNotFinished(meetupId));
+    public void subscribeToMeetup(String meetupId, String employeeEmail) {
+        LOGGER.info("Going to subscribe the employee {} to the meetup {}", employeeEmail, meetupId);
+        guestService.addGuest(employeeEmail, findMeetupByIdIfNotFinished(meetupId));
     }
 
-    public void confirmGuestParticipationToMeetup(String meetupId, String employeeId){
-        updateMeetupGuestStatus(meetupId, employeeId, GuestStatus.CONFIRMED);
+    public void confirmGuestParticipationToMeetup(String meetupId, String employeeEmail){
+        updateMeetupGuestStatus(meetupId, employeeEmail, GuestStatus.CONFIRMED);
     }
 
-    public void guestRefusesParticipationToMeetup(String meetupId, String employeeId){
-        updateMeetupGuestStatus(meetupId, employeeId, GuestStatus.NOT_GOING);
+    public void guestRefusesParticipationToMeetup(String meetupId, String employeeEmail){
+        updateMeetupGuestStatus(meetupId, employeeEmail, GuestStatus.NOT_GOING);
     }
 
     public Meetup findMeetupByIdIfNotFinished(String meetupId){
@@ -80,7 +80,6 @@ public class MeetupService {
     }
 
     private void validateMeetupRequest(MeetupRequest meetupRequest) {
-        Assert.notNull(meetupRequest.getOrganizerId(), "The organizerId is null");
         Assert.notNull(meetupRequest.getDate(), "The date for the meetup is null");
         validateLocation(meetupRequest.getLocation());
         Assert.notNull(meetupRequest.getGuestEmails(), "The guests list is null");
@@ -96,11 +95,11 @@ public class MeetupService {
         }
     }
 
-    private Meetup buildNewMeetup(MeetupRequest meetupRequest){
+    private Meetup buildNewMeetup(String organizerEmployeeEmail, MeetupRequest meetupRequest){
         Meetup newMeetup = new Meetup();
         newMeetup.setId(UUID.randomUUID().toString());
         newMeetup.setDate(meetupRequest.getDate());
-        newMeetup.setOrganizer(employeeService.findById(meetupRequest.getOrganizerId()));
+        newMeetup.setOrganizer(employeeService.findByEmail(organizerEmployeeEmail));
         newMeetup.setLocation(Location.valueOf(meetupRequest.getLocation()));
         return newMeetup;
     }
@@ -115,9 +114,9 @@ public class MeetupService {
         return meetupResponse;
     }
 
-    private void updateMeetupGuestStatus(String meetupId, String employeeId, GuestStatus newStatus) {
+    private void updateMeetupGuestStatus(String meetupId, String employeeEmail, GuestStatus newStatus) {
         Meetup meetup = findMeetupByIdIfNotFinished(meetupId);
-        guestService.updateGuestStatus(meetup, employeeId, newStatus);
+        guestService.updateGuestStatus(meetup, employeeEmail, newStatus);
     }
 
 }

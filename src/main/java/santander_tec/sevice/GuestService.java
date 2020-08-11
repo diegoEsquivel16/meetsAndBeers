@@ -34,9 +34,9 @@ public class GuestService {
         return guestRepository.saveAll(guests);
     }
 
-    public Guest addGuest(String guestEmployeeId, Meetup meetup){
-        LOGGER.info("Going to find the employee {}", guestEmployeeId);
-        Employee employee = employeeService.findById(guestEmployeeId);
+    public Guest addGuest(String guestEmployeeEmail, Meetup meetup){
+        LOGGER.info("Going to find the employee {}", guestEmployeeEmail);
+        Employee employee = employeeService.findByEmail(guestEmployeeEmail);
         LOGGER.info("Going to build and save the guest for the meetup {}", meetup.getId());
         return guestRepository.save(buildGuest(employee, meetup));
     }
@@ -50,8 +50,8 @@ public class GuestService {
         return newGuest;
     }
 
-    public void updateGuestStatus(Meetup meetup, String guestEmployeeId, GuestStatus newGuestStatus){
-        Employee employee = employeeService.findById(guestEmployeeId);
+    public void updateGuestStatus(Meetup meetup, String guestEmployeeEmail, GuestStatus newGuestStatus){
+        Employee employee = employeeService.findByEmail(guestEmployeeEmail);
         LOGGER.info("Going to update the guest status to {} for the meetup {}", newGuestStatus, meetup.getId());
         guestRepository.updateGuestStatus(meetup, employee, newGuestStatus);
     }

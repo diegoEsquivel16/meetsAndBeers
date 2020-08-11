@@ -3,6 +3,7 @@ package santander_tec.controllers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Secured({"ADMIN", "USER"})
     @PostMapping("/user/register")
     public ResponseEntity registerUser(@RequestBody UserRegisterRequest request){
         try {
@@ -32,6 +34,7 @@ public class UserController {
         }
     }
 
+    @Secured({"ADMIN"})
     @PostMapping("/admin/register")
     public ResponseEntity registerAdmin(@RequestBody UserRegisterRequest request){
         try {

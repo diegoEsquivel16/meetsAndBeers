@@ -3,6 +3,7 @@ package santander_tec.config;
 import okhttp3.OkHttpClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import santander_tec.sevice.weather.clients.DummyApiWeather;
 import santander_tec.sevice.weather.clients.open_weather.OpenWeatherConnector;
 
@@ -21,5 +22,11 @@ public class MeetAndBeerConfig {
     public OpenWeatherConnector getOpenWeather(){
         return new OpenWeatherConnector(getOkHttpClient());
     }
+
+    @Bean
+    public BCryptPasswordEncoder encoder() {
+        return new BCryptPasswordEncoder();
+    }
+
 
 }

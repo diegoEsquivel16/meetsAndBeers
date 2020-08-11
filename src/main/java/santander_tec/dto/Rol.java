@@ -1,5 +1,12 @@
 package santander_tec.dto;
 
-public enum Rol {
-    USER, ADMIN
+import org.springframework.security.core.GrantedAuthority;
+
+public enum Rol implements GrantedAuthority {
+    USER, ADMIN;
+
+    @Override
+    public String getAuthority() {
+        return this.name();
+    }
 }
